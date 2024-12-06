@@ -6,70 +6,53 @@ function readInputFile(filename: string): string {
     return readFileSync(filePath, 'utf-8');
 }
 
-//console.log(readInputFile("input.txt"))
-
 const inputData = readInputFile("input.txt")
 
 const lines = inputData.split("\n");
 
-//console.log(lines)
-let safeReports: number = 0
-let nonSafeLevelDecreasing: number = 0
-let nonSafeLevelIncreasing: number = 0
-let nonSafeLevel: number = 0
-let line: string = ''
-let lineElementsString: string[] = []
-let increasing: boolean = true;
-let decreasing: boolean = true;
-let lessThanFourMoreThanOne: boolean = true;
-
-//Loop over each line/report
-for(let i=0; i < lines.length; i++) {
-    line = lines[i]
-    lineElementsString= line.split(" ");
-    const lineElements = lineElementsString.map(str => parseInt(str, 10));
-
-    decreasing =true;
-    increasing=true;
-    lessThanFourMoreThanOne=true;
-    nonSafeLevelDecreasing=0
-    nonSafeLevelIncreasing=0
-    nonSafeLevel=0
-    for(let j=0; j < lineElements.length - 1; j++) {
-        if(lineElements[j] > lineElements[j+1]) {
-            nonSafeLevelIncreasing++;
-            if(lineElements[j] > lineElements[j+2]) {
-                nonSafeLevelIncreasing++;
-                increasing = false;
-            }
-        }
-        if(lineElements[j] < lineElements[j+1]) {
-            nonSafeLevelDecreasing++;
-            if(lineElements[j] < lineElements[j+2]) {
-                nonSafeLevelDecreasing++;
+function isSafe(report: number[]){
+    let biggestChange: number | undefined = 0;
+    let smallestChange: number | undefined = 0;
+    let decreasing = false
+    let increasing = false;
+    for (let i = 0; i < report.length-1; i++) {
+        if (report[i] < report[i - 1]) decreasing = true;
+        if (report[i] > report[i - 1]) increasing = true;
+        biggestChange = typeof biggestChange != "undefined" ? Math.max(biggestChange, Math.abs(report[i] - report[i - 1])) : Math.abs(report[i] - report[i - 1]);
+        smallestChange = typeof smallestChange != "undefined" ? Math.min(smallestChange, Math.abs(report[i] - report[i - 1])) : Math.abs(report[i] - report[i - 1]);
+        if ((decreasing && increasing) || (!decreasing && !increasing) || biggestChange > 3 || smallestChange < 1) {
+            for (let j = 0; j < report.length; j++) {
+                let temp = report.slice();
+                temp.splice(j, 1);
+                biggestChange = undefined;
+                smallestChange = undefined;
                 decreasing = false;
+                increasing = false;
+                for (let k = 1; k < temp.length; k++) {
+                    if (temp[k] < temp[k - 1]) decreasing = true;
+                    if (temp[k] > temp[k - 1]) increasing = true;
+                    biggestChange = typeof biggestChange != "undefined" ? Math.max(biggestChange, Math.abs(temp[k] - temp[k - 1])) : Math.abs(temp[k] - temp[k - 1]);
+                    smallestChange = typeof smallestChange != "undefined" ? Math.min(smallestChange, Math.abs(temp[k] - temp[k - 1])) : Math.abs(temp[k] - temp[k - 1]);
+                }
+                if (((decreasing && !increasing) || (!decreasing && increasing)) && biggestChange <= 3 && smallestChange >= 1) break;
             }
+            break;
         }
-        if(Math.abs(lineElements[j] - lineElements[j+1]) > 3 || Math.abs(lineElements[j] - lineElements[j+1]) < 1) {
-            nonSafeLevel++;  
-            if(Math.abs(lineElements[j] - lineElements[j+2]) > 3 || Math.abs(lineElements[j] - lineElements[j+2]) < 1) {
-                nonSafeLevel++;
-            }
-        }        
     }
 
-        // console.log("increasing: " + increasing)
-        // console.log("decreasing: " + decreasing)
-        // console.log("nonSafeLevelIncreasing: " + nonSafeLevelIncreasing)
-        // console.log("nonSafeLevelDecreasing: " + nonSafeLevelDecreasing)
-        // console.log("nonSafeLevel: " + nonSafeLevel)
-        // console.log(line)
-        // console.log("------")
-
-    if(increasing && (nonSafeLevelIncreasing + nonSafeLevel < 2))
-        safeReports++;
-    if(decreasing && (nonSafeLevelDecreasing + nonSafeLevel < 2))
-        safeReports++;
+    return ((decreasing && !increasing) || (!decreasing && increasing)) && biggestChange <= 3 && smallestChange >= 1;
 }
 
-console.log(safeReports);
+let safeReports: number = 0;
+let line: string = '';
+let lineElementsString: string [] = [];
+for(let i=0; i < lines.length; i++) {
+    line = lines[i]
+    lineElementsString = line.split(" ");
+    const lineElements = lineElementsString.map(str => parseInt(str, 10));
+    if(isSafe(lineElements)){
+        safeReports++;
+    }
+}
+console.log(safeReports)
+
