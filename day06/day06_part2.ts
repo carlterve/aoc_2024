@@ -44,11 +44,11 @@ function walkUp(matrix: string[][], guardPosition: number []): boolean{
     
     for(let row = guardCurrRow; row >= 1; row--){
         let nextPos = matrix[row-1][guardCurrCol];
-        if(nextPos === '.' || nextPos === 'X'){
-            matrix[row][guardCurrCol] = 'X';
+        if(nextPos === '.' || nextPos === 'x'){
+            matrix[row][guardCurrCol] = 'x';
             matrix[row-1][guardCurrCol] = '^';
             withinArea=true;
-        }else if(nextPos === '#'){
+        }else if(nextPos === '#' || nextPos === 'O'){
             matrix[row][guardCurrCol] = '>';
             withinArea=true;
             break;
@@ -56,17 +56,18 @@ function walkUp(matrix: string[][], guardPosition: number []): boolean{
     }
     return withinArea;
 }
+
 function walkDown(matrix: string[][], guardPosition: number []): boolean{
     let guardCurrRow = guardPosition[0];
     let guardCurrCol= guardPosition[1];
     let withinArea: boolean = false;
     for(let row = guardCurrRow; row < nrRows - 1; row++){
         let nextPos = matrix[row+1][guardCurrCol];
-        if(nextPos === '.' || nextPos === 'X'){
-            matrix[row][guardCurrCol] = 'X';
+        if(nextPos === '.' || nextPos === 'x'){
+            matrix[row][guardCurrCol] = 'x';
             matrix[row+1][guardCurrCol] = 'v';
             withinArea=true;
-        }else if(nextPos === '#'){
+        }else if(nextPos === '#' || nextPos === 'O'){
             matrix[row][guardCurrCol] = '<';
             withinArea=true;
             break;
@@ -74,17 +75,18 @@ function walkDown(matrix: string[][], guardPosition: number []): boolean{
     }
     return withinArea;
 }
+
 function walkRight(matrix: string[][], guardPosition: number []){
     let guardCurrRow = guardPosition[0];
     let guardCurrCol= guardPosition[1];
     let withinArea: boolean = false;
     for(let col = guardCurrCol; col < nrCols - 1; col++){
         let nextPos = matrix[guardCurrRow][col+1];
-        if(nextPos === '.' || nextPos === 'X'){
-            matrix[guardCurrRow][col] = 'X';
+        if(nextPos === '.' || nextPos === 'x'){
+            matrix[guardCurrRow][col] = 'x';
             matrix[guardCurrRow][col+1] = '>';
             withinArea=true;
-        }else if(nextPos === '#'){
+        }else if(nextPos === '#' || nextPos === 'O'){
             matrix[guardCurrRow][col] = 'v';
             withinArea=true;
             break;
@@ -92,6 +94,7 @@ function walkRight(matrix: string[][], guardPosition: number []){
     }
     return withinArea;
 }
+
 function walkLeft(matrix: string[][], guardPosition: number []){
     let guardCurrRow = guardPosition[0];
     let guardCurrCol= guardPosition[1];
@@ -99,11 +102,11 @@ function walkLeft(matrix: string[][], guardPosition: number []){
     let withinArea: boolean = false;
     for(let col = guardCurrCol; col >= 1; col--){
         let nextPos = matrix[guardCurrRow][col-1];
-        if(nextPos === '.' || nextPos === 'X'){
-            matrix[guardCurrRow][col] = 'X';
+        if(nextPos === '.' || nextPos === 'x'){
+            matrix[guardCurrRow][col] = 'x';
             matrix[guardCurrRow][col-1] = '<';
             withinArea=true;
-        }else if(nextPos === '#'){
+        }else if(nextPos === '#' || nextPos === 'O'){
             matrix[guardCurrRow][col] = '^';
             withinArea = true
             break;
@@ -115,7 +118,8 @@ function walkLeft(matrix: string[][], guardPosition: number []){
 function walkTheGuard(matrix: string[][]): boolean {
     let guardPosition: number[] = findGuard(matrix);
     let guardDirection: string = matrix[guardPosition[0]][guardPosition[1]];
-    let withinArea:boolean = false;
+
+    let withinArea: boolean = false;
     if(guardDirection === '^'){
         withinArea =  walkUp(matrix, guardPosition);
     }else if(guardDirection === 'v'){
@@ -127,28 +131,35 @@ function walkTheGuard(matrix: string[][]): boolean {
     }else{
         console.log("WE LOST THE GUARD!");
     }
-    return withinArea;
-} 
 
-
-function part1(){
-    while(walkTheGuard(matrix));
-    let counter: number = 1;
-    let line: string = ''
-    for(let row = 0; row < nrRows; row++){
-        line = ''
-        for(let col = 0; col < nrCols; col++){
-            line += matrix[row][col];
-            if(matrix[row][col] === 'X')
-                counter++
-        }
-        console.log(line);
+    //Here I'm assuming that it wont take more than 500 iterations to exit the grid
+    //Please ignore this ugly mess
+    iter ++;
+    if(iter > 500){
+        nrLoops++;
+        return false;
     }
-    console.log(counter)
-};
+    return withinArea;
+}
 
+async function part2() {
+    let matrixCopy: string[][] = matrix
+    for(let row = 0; row < nrRows; row++){
+        for(let col = 0; col < nrCols; col++){
+            matrixCopy = stringToMatrix(inputData)
+            if(matrixCopy[row][col] === '.'){
+                matrixCopy[row][col] = 'O';
+                while(walkTheGuard(matrixCopy));
+                iter = 0;
+            }
+        }
+    }
+    console.log(nrLoops)
+}
+let nrLoops: number = 0;
+let iter: number = 0;
 const inputData = readInputFile("input.txt")
 const matrix = stringToMatrix(inputData);
-const nrRows = matrix.length;
-const nrCols = matrix[0].length;
-part1();
+let nrRows = matrix.length;
+let nrCols = matrix[0].length;
+part2();

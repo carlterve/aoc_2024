@@ -6,8 +6,6 @@ function readInputFile(filename) {
     var filePath = (0, path_1.join)(__dirname, filename);
     return (0, fs_1.readFileSync)(filePath, 'utf-8');
 }
-//console.log(readInputFile("input.txt"))
-var inputData = readInputFile("input.txt");
 function stringToMatrix(input) {
     var matrix = [];
     var matrixRow = [];
@@ -26,10 +24,6 @@ function stringToMatrix(input) {
     }
     return matrix;
 }
-//console.log(stringToMatrix(inputData));
-var matrix = stringToMatrix(inputData);
-var nrRows = matrix.length;
-var nrCols = matrix[0].length;
 function findGuard(matrix) {
     var guardPosition = [];
     for (var row = 0; row < nrRows; row++) {
@@ -140,18 +134,25 @@ function walkTheGuard(matrix) {
     }
     return withinArea;
 }
-while (walkTheGuard(matrix))
-    ;
-//start at 1 to account for exiting step
-var counter = 1;
-var line = '';
-for (var row = 0; row < nrRows; row++) {
-    line = '';
-    for (var col = 0; col < nrCols; col++) {
-        line += matrix[row][col];
-        if (matrix[row][col] === 'X')
-            counter++;
+function part1() {
+    while (walkTheGuard(matrix))
+        ;
+    var counter = 1;
+    var line = '';
+    for (var row = 0; row < nrRows; row++) {
+        line = '';
+        for (var col = 0; col < nrCols; col++) {
+            line += matrix[row][col];
+            if (matrix[row][col] === 'X')
+                counter++;
+        }
+        console.log(line);
     }
-    console.log(line);
+    console.log(counter);
 }
-console.log(counter);
+;
+var inputData = readInputFile("input.txt");
+var matrix = stringToMatrix(inputData);
+var nrRows = matrix.length;
+var nrCols = matrix[0].length;
+part1();
